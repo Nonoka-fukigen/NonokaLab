@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>设置 · Nonoka Lab</title>
+  <title>通用 · Nonoka Lab</title>
   <link rel="stylesheet" href="../css/cupertino.css?v=20260818" />
 </head>
 <body>
@@ -13,7 +13,6 @@
       <g id="icon-globe" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></g>
       <g id="icon-cloud" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 17 18z"/><path d="M12 12v6M9.5 14.5 12 12l2.5 2.5"/></g>
       <g id="icon-puzzle" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4h4a2 2 0 0 1 4 0v2a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v2a2 2 0 0 1-4 0h-4a2 2 0 0 1 0-4 2 2 0 0 0-2-2 2 2 0 0 1 0-4 2 2 0 0 0 2-2V6a2 2 0 0 1 0-2z"/></g>
-      <g id="icon-megaphone" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4a1 1 0 0 0 1 1h2l8 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M18 9a3 3 0 0 1 0 6"/></g>
       <g id="icon-refresh" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-1.5 5"/><path d="M20 5v6h-6"/></g>
       <g id="icon-download" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 4 5-4"/><path d="M4 19h16"/></g>
       <g id="icon-star" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8L6.6 19.6l1-6L3.3 9.4l6-.9z"/></g>
@@ -50,7 +49,6 @@
       root.appendChild(componentsCard());
       var devBox = P.el('<div id="devCards"></div>');
       root.appendChild(devBox);
-      root.appendChild(feedbackCard());
       // 开发者模式：异步判断后追加高级卡片（失败也不影响基础显示）
       Promise.resolve(api().get_dev_mode()).then(function (dev) {
         dev = !!dev;
@@ -598,22 +596,6 @@
           box.appendChild(row);
         });
       }).catch(function () {});
-    }
-
-    /* ---- 反馈 ---- */
-    function feedbackCard() {
-      var c = P.el('<div class="card"><h3>' + P.icon("megaphone") + " " + P.T("grp_feedback") + "</h3>" +
-        '<div class="field"><label>' + P.T("feedback_summary") + '</label><input class="input" id="fbSum" /></div>' +
-        '<div class="field"><label>' + P.T("feedback_desc") + '</label><textarea class="input" id="fbDesc"></textarea></div>' +
-        '<label class="check"><input type="checkbox" id="fbLog" checked /> ' + P.T("feedback_attach_log") + "</label>" +
-        '<div class="row center" style="margin-top:14px"><button class="btn primary" id="fbSubmit">' + P.T("feedback_submit") + "</button></div></div>");
-      c.querySelector("#fbSubmit").addEventListener("click", function () {
-        var payload = { summary: c.querySelector("#fbSum").value, description: c.querySelector("#fbDesc").value, include_log: c.querySelector("#fbLog").checked };
-        Promise.resolve(api().submit_feedback(payload)).then(function () {
-          P.modal(P.T("feedback_title"), P.T("ok"));
-        }).catch(function (e) { P.modal(P.T("crash_title"), String(e)); });
-      });
-      return c;
     }
 
     Page.boot(render);

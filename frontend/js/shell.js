@@ -88,11 +88,47 @@
     onPluginState: function (info) {
       if (info && info.id) {
         App.pluginStates = App.pluginStates || {};
-        App.pluginStates[info.id] = info.state;
+        var st = info.state;
+        App.pluginStates[info.id] = st;
         refreshRunningBadges();
-        window.NonokaShell.deliverToPlugin(info.id, { type: "state", state: info.state });
+        // 统一状态推送：插件前端只监听 status_sync 即可感知运行中/停止/暂停/崩溃
+        window.NonokaShell.deliverToPlugin(info.id, {
+          type: "status_sync",
+          status: st,
+          crashed: st === "crashed",
+          crash_reason: info.crash_reason || "",
+        });
       }
       deliverToPage("onPluginState", info);
+    },
+    /* 统一状态同步：向后端查询某插件真实状态并注入前端/插件。
+       由 selectPlugin 切页、插件加载完成、插件市场更新等统一调用。
+       插件前端无需自己记忆状态，只需监听 status_sync 事件。 */
+    sync_plugin_status: function (pid) {
+      return new Promise(function (resolve) {
+        var a = api();
+        if (!a || typeof a.get_plugin_state !== "function") {
+          resolve({ state: ((App.pluginStates && App.pluginStates[pid]) || "stopped") });
+          return;
+        }
+        try {
+          Promise.resolve(a.get_plugin_state(pid)).then(function (r) {
+            r = (r && r.data !== undefined) ? r.data : r;
+            r = r || {};
+            var st = r.state || "stopped";
+            App.pluginStates = App.pluginStates || {};
+            App.pluginStates[pid] = st;
+            refreshRunningBadges();
+            if (pid) window.NonokaShell.deliverToPlugin(pid, {
+              type: "status_sync",
+              status: st,
+              crashed: !!r.crashed,
+              crash_reason: r.crash_reason || "",
+            });
+            resolve(r);
+          }).catch(function () { resolve({ state: "stopped" }); });
+        } catch (e) { resolve({ state: "stopped" }); }
+      });
     },
     onClipboardDetect: function (info) { onClipboardDetect(info); },
     /* 控制台：Python 新日志实时推送到控制台页面 */
@@ -368,9 +404,24 @@
     App.frameKind = "plugin";
     document.getElementById("topTitle").textContent = p.name;
     var frame = document.getElementById("contentFrame");
-    if (frame.getAttribute("data-src") !== p.frontend) {
+    var isNew = frame.getAttribute("data-src") !== p.frontend;
+    if (isNew) {
       frame.setAttribute("data-src", p.frontend);
       frame.src = p.frontend;
+    }
+    // 统一状态同步：切页/重渲染时向 Shell 拉取真实状态并注入插件。
+    // 插件前端只负责展示，状态由 plugin_manager 单一维护。
+    // 新页面：等 frame load 后再同步，确保插件 JS 已就绪；已有页面：立即同步。
+    if (isNew) {
+      var _synced = false;
+      var _sl = function () {
+        if (_synced) return; _synced = true;
+        try { window.NonokaShell.sync_plugin_status(p.id); } catch (e) {}
+      };
+      frame.removeEventListener("load", _sl);
+      frame.addEventListener("load", _sl);
+    } else {
+      try { window.NonokaShell.sync_plugin_status(p.id); } catch (e) {}
     }
   }
 
@@ -396,19 +447,14 @@
   /* ---------------- 更新事件 ---------------- */
   function onUpdateEvent(info) {
     if (!info) return;
+    // 启动时的版本提示统一由外壳弹窗
     if (info.startup && info.update_available) {
       showModal(tfmt("new_version", { latest: info.latest }),
         tfmt("new_version_body", { current: info.current, notes: info.notes || "" }),
         [{ label: T("ok"), href: info.url }]);
       return;
     }
-    if (info.done && info.ok) {
-      showModal(T("update_downloaded"),
-        tfmt("update_downloaded_body", { path: info.path || "" }),
-        [{ label: T("open_log") || "打开", onClick: function () { api() && api().open_external_folder(info.path); } }]);
-      return;
-    }
-    // 进度 / 失败：转发给设置页（如有）
+    // 下载进度 / 完成 / 失败：透传给当前页面，由「关于」页下载弹窗自行展示进度
     deliverToPage("onUpdateEvent", info);
   }
 

@@ -19,7 +19,7 @@ from .plugin_manager import CorePluginManager
 from .service_locator import ServiceLocator
 from .config import Config
 
-CORE_VERSION = "1.0.0"  # 与 brand.VERSION 一致（正式发布前）
+CORE_VERSION = "1.0.1"  # 与 brand.VERSION 一致（正式发布前）
 
 __all__ = ["EventBus", "Plugin", "CorePluginManager", "ServiceLocator",
            "Config", "CORE_VERSION"]

@@ -488,6 +488,16 @@ class NonokaBridge:
     def get_state(self, pid):
         return self.ctx.plugin_manager.state(pid)
 
+    # 别名：插件前端统一调用 get_plugin_state；保留 get_state 兼容旧调用方。
+    # 返回带崩溃原因的完整状态对象，供 Shell 统一状态同步使用。
+    def get_plugin_state(self, pid):
+        pm = self.ctx.plugin_manager
+        return {
+            "state": pm.state(pid),
+            "crashed": pm.state(pid) == "crashed",
+            "crash_reason": pm.crash_reason(pid) if hasattr(pm, "crash_reason") else "",
+        }
+
     def invoke_plugin(self, pid, method, args=None):
         """顶层插件方法派发：`invoke_plugin(pid, method, args)`。
 
@@ -577,6 +587,16 @@ class NonokaBridge:
     def open_external_folder(self, path):
         return open_folder(path)
 
+    def open_external_url(self, url):
+        """用系统默认浏览器打开外部链接（WebView2 内 window.open 不可靠）。"""
+        import webbrowser
+        try:
+            webbrowser.open(url)
+            return {"ok": True, "url": url}
+        except Exception as e:  # noqa: BLE001
+            _log.warning("打开外部链接失败: %s", e)
+            return {"ok": False, "url": url, "error": str(e)}
+
     def open_log_folder(self):
         d = os.path.join(get_data_dir(), "logs")
         try:
@@ -612,24 +632,7 @@ class NonokaBridge:
             self.ctx.notifier.notify(title, body or "", force=True)
         return True
 
-    # ----------------------- 反馈 / 崩溃 -----------------------
-    def get_log_text(self, lines=120):
-        path = os.path.join(get_data_dir(), "logs", "nonoka.log")
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return "\n".join(f.read().splitlines()[-lines:])
-        except Exception:
-            return ""
-
-    def submit_feedback(self, payload):
-        payload = payload or {}
-        include_log = bool(payload.get("include_log", False))  # 默认不含日志（隐私）
-        log_text = self.get_log_text() if include_log else ""
-        url = feedback.open_feedback(
-            payload.get("summary", ""), payload.get("description", ""),
-            include_log=include_log, log_text=log_text)
-        return {"url": url}
-
+    # ----------------------- 崩溃上报 -----------------------
     def open_crash_issue(self, include_logs=False):
         rep = crash_report.read_last()
         if not rep:

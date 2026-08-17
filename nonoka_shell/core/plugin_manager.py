@@ -24,7 +24,7 @@ log = logging.getLogger("nonoka.core")
 class CorePluginManager:
     """Core 层的插件管理器（纯机制）。"""
 
-    def __init__(self, core_version="1.0.0", bus=None, services=None):
+    def __init__(self, core_version="1.0.1", bus=None, services=None):
         self.core_version = core_version
         # Core 能力组合：事件总线（异步）+ 服务定位器（同步）
         from .event_bus import EventBus

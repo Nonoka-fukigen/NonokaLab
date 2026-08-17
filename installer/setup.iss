@@ -7,7 +7,7 @@
 ; ============================================================
 
 #define MyAppName "Nonoka Lab"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Nonoka"
 #define MyAppURL "https://github.com/nonoka-lab/nonoka-lab"
 #define MyAppExeName "NonokaLab.exe"

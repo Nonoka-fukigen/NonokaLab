@@ -67,6 +67,7 @@
     state.running = (st === "running");
     if (st === "running") { badge.className = "tag run"; badge.textContent = "运行中"; }
     else if (st === "paused") { badge.className = "tag wait"; badge.textContent = "已暂停"; }
+    else if (st === "crashed") { badge.className = "tag no"; badge.textContent = "已崩溃"; }
     else { badge.className = "tag stop"; badge.textContent = "已停止"; }
     applyRunningUI();
   }
@@ -87,10 +88,17 @@
     showModal("需要启动插件", "该功能需要在插件运行后才能使用。请使用左侧导航栏的开关按钮启动插件。");
     return false;
   }
+  /* 页面加载时向 Shell 拉取真实运行状态（统一状态同步）。
+     Shell 的 selectPlugin 每次切页都会推送 status_sync；这里再做一次兜底，
+     确保插件页首次加载（DOM 重建）也能立即反映 plugin_manager 的真实状态。 */
   function refreshRunState() {
     var a = shell();
     if (!a || !a.get_plugin_state) return;
-    Promise.resolve(a.get_plugin_state(PLUGIN)).then(setRunState).catch(function () {});
+    Promise.resolve(a.get_plugin_state(PLUGIN)).then(function (r) {
+      r = (r && r.data !== undefined) ? r.data : r;
+      r = r || {};
+      setRunState(r.state || "stopped");
+    }).catch(function () {});
   }
 
   /* -------- DOM / 通信辅助 -------- */
@@ -143,8 +151,17 @@
         }
         enableActions(true);
         break;
+      case "status_sync":
+        // 统一状态同步事件（Shell 推来的插件真实状态）。status 可取
+        // running / stopped / paused / crashed。
+        setRunState(ev.status);
+        // 状态变化（启动/停止）时响应式刷新 FFmpeg 检测，横幅自动显隐
+        refreshFfmpeg();
+        break;
       case "state":
+        // 兼容旧版事件（仅含 state 字段）
         setRunState(ev.state);
+        refreshFfmpeg();
         break;
       case "qr_success":
         if (ev.cookie) $("cookie").value = ev.cookie;
@@ -262,6 +279,16 @@
     if (!b) return;
     var installed = !!(state.ffmpeg && state.ffmpeg.installed);
     b.style.display = (!installed && !state.ffmpegIgnored) ? "flex" : "none";
+  }
+  /* 响应式刷新 FFmpeg 检测状态：重新向后端查询最新安装状态并更新横幅/警告。
+     由 status_sync / state 事件在插件启动/停止时自动触发，实现无需切页即时显隐。 */
+  function refreshFfmpeg() {
+    rpc("get_status").then(function (r) {
+      var st = (r && r.data) || {};
+      state.ffmpeg = st.ffmpeg;
+      refreshFfmpegWarn();
+      refreshFfmpegBanner();
+    }).catch(function () {});
   }
 
   /* -------- 标签切换 -------- */
