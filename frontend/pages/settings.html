@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>设置 · Nonoka Lab</title>
+  <link rel="stylesheet" href="../css/cupertino.css?v=20260818" />
+</head>
+<body>
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <g id="icon-gear" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></g>
+      <g id="icon-globe" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></g>
+      <g id="icon-cloud" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 17 18z"/><path d="M12 12v6M9.5 14.5 12 12l2.5 2.5"/></g>
+      <g id="icon-puzzle" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4h4a2 2 0 0 1 4 0v2a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v2a2 2 0 0 1-4 0h-4a2 2 0 0 1 0-4 2 2 0 0 0-2-2 2 2 0 0 1 0-4 2 2 0 0 0 2-2V6a2 2 0 0 1 0-2z"/></g>
+      <g id="icon-megaphone" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4a1 1 0 0 0 1 1h2l8 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M18 9a3 3 0 0 1 0 6"/></g>
+      <g id="icon-refresh" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-1.5 5"/><path d="M20 5v6h-6"/></g>
+      <g id="icon-download" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 4 5-4"/><path d="M4 19h16"/></g>
+      <g id="icon-star" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8L6.6 19.6l1-6L3.3 9.4l6-.9z"/></g>
+      <g id="icon-check" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7"/></g>
+      <g id="icon-x" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></g>
+      <g id="icon-folder" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></g>
+      <g id="icon-cloud-up" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.3A3.5 3.5 0 0 1 17 18z"/><path d="M12 12v6M9.5 14.5 12 12l2.5 2.5"/></g>
+      <g id="icon-code" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></g>
+      <g id="icon-key" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M14 9l2 2"/></g>
+      <g id="icon-power" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v8M7.5 7a7 7 0 1 0 9 0"/></g>
+      <g id="icon-eye" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></g>
+    </defs>
+  </svg>
+
+  <div class="page">
+    <div id="settings"></div>
+  </div>
+
+  <script src="../js/page.js"></script>
+  <script>
+  (function () {
+    var P = window.Page;
+    function api() { return P.api(); }
+
+    function render() {
+      var root = document.getElementById("settings");
+      root.innerHTML = "";
+      // 基础卡片立即渲染（不依赖异步结果，避免整页空白）
+      var warn = P.el('<div class="dev-warning" style="display:none;background:#fff0f0;color:#c0392b;border:1px solid #f5c6c6;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:12px">⚠ ' +
+        P.esc(P.T("dev_mode_warning")) + "</div>");
+      root.appendChild(warn);
+      root.appendChild(generalCard());
+      root.appendChild(languageCard());
+      root.appendChild(componentsCard());
+      var devBox = P.el('<div id="devCards"></div>');
+      root.appendChild(devBox);
+      root.appendChild(feedbackCard());
+      // 开发者模式：异步判断后追加高级卡片（失败也不影响基础显示）
+      Promise.resolve(api().get_dev_mode()).then(function (dev) {
+        dev = !!dev;
+        root.setAttribute("data-dev", dev ? "1" : "0");
+        warn.style.display = dev ? "block" : "none";
+        if (dev) {
+          devBox.appendChild(proxyCard());
+          devBox.appendChild(hotkeyCard());
+          devBox.appendChild(backupCard());
+          devBox.appendChild(autostartCard());
+          devBox.appendChild(pluginsCard());
+          devBox.appendChild(marketCard());
+          devBox.appendChild(developerCard());
+        }
+      }).catch(function () { root.setAttribute("data-dev", "0"); });
+      // 异步载入
+      loadTheme();
+      loadComponents();
+      loadPlugins();
+      loadMarket();
+      loadProxy();
+      loadHotkey();
+      loadAutostart();
+      loadDevMode();
+      loadStats();
+    }
+
+    function groupTitle(t) {
+      return P.el('<div class="nav-group-title" style="padding-left:2px">' + P.esc(t) + "</div>");
+    }
+    function toggleRow(label, hint, checked, onChange, labelId) {
+      var c = P.el(
+        '<label class="row center" style="margin:10px 0;cursor:pointer">' +
+        '<input type="checkbox" id="' + (labelId || "") + '" style="width:18px;height:18px;accent-color:var(--accent)"' + (checked ? " checked" : "") + " />" +
+        '<div><div style="font-size:14px;font-weight:600;color:var(--label)">' + P.esc(label) + "</div>" +
+        (hint ? '<div class="muted" style="font-size:12.5px">' + P.esc(hint) + "</div>" : "") + "</div></label>");
+      c.querySelector("input").addEventListener("change", function (e) { onChange(e.target.checked); });
+      return c;
+    }
+
+    /* ---- 通用 ---- */
+    function generalCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("gear") + " " + P.T("grp_general") + "</h3>" +
+        '<div class="field" style="margin-top:8px"><label>' + P.T("theme_mode_label") + "</label>" +
+        '<div class="seg" id="themeSeg">' +
+        '<button data-m="light">' + P.T("theme_light") + "</button>" +
+        '<button data-m="dark">' + P.T("theme_dark") + "</button>" +
+        '<button data-m="auto">' + P.T("theme_auto") + "</button></div></div>" +
+        '<div class="field" style="margin-top:8px"><label>' + P.T("close_action_label") + "</label>" +
+        '<div class="seg" id="closeActionSeg">' +
+        '<button data-m="minimize">' + P.T("close_action_minimize") + "</button>" +
+        '<button data-m="quit">' + P.T("close_action_quit") + "</button></div></div>" +
+        '<div id="genToggles"></div>' +
+        '<div class="row center wrap" style="margin-top:10px">' +
+        '<button class="btn ghost" id="btnCheckUpdate">' + P.T("check_update") + "</button>" +
+        '<button class="btn gray" id="btnDevtools">' + P.T("open_devtools") + "</button>" +
+        '<button class="btn gray" id="btnOpenLog">' + P.T("open_log") + "</button></div>" +
+        '<div class="muted" id="dbStats" style="margin-top:12px;font-size:13px"></div></div>');
+      c.querySelector("#btnCheckUpdate").addEventListener("click", function () {
+        Promise.resolve(api().check_update()).then(function (info) {
+          if (info.update_available) {
+            P.modal(P.tfmt("new_version", { latest: info.latest }),
+              P.tfmt("new_version_body", { current: info.current, notes: info.notes || "" }),
+              [{ label: P.T("ok"), href: info.url }]);
+          } else {
+            P.modal(P.T("latest"), P.tfmt("latest_body", { current: info.current }));
+          }
+        }).catch(function (e) { P.modal(P.T("crash_title"), String(e)); });
+      });
+      c.querySelector("#btnOpenLog").addEventListener("click", function () { api().open_log_folder(); });
+      c.querySelector("#btnDevtools").addEventListener("click", function () {
+        Promise.resolve(api().open_debug_tools()).then(function (r) {
+          if (!r || !r.ok || r.error) P.modal(P.T("open_devtools"), (r && r.error) || P.T("open_devtools_err"));
+        }).catch(function (e) { P.modal(P.T("open_devtools"), String(e && e.message ? e.message : e)); });
+      });
+      var tg = c.querySelector("#genToggles");
+      tg.appendChild(toggleRow(P.T("notifications_label"), P.T("notifications_hint"), false, function (v) { api().set_notifications(v); }));
+      tg.appendChild(toggleRow(P.T("minimize_tray_label"), P.T("minimize_tray_hint"), true, function (v) { api().set_minimize_tray(v); }));
+      tg.appendChild(toggleRow(P.T("clipboard_label"), P.T("clipboard_hint"), false, function (v) { api().set_clipboard(v); }));
+      tg.appendChild(toggleRow(P.T("restore_running_label"), P.T("restore_running_hint"), false, function (v) { api().set_setting("restore_running", v); }));
+      var autoCrash = toggleRow(P.T("auto_restart_crashed_label"), "", false, function (v) { api().set_setting("auto_restart_crashed", v); });
+      autoCrash.setAttribute("data-dev-only", "1");
+      tg.appendChild(autoCrash);
+      c.querySelector("#themeSeg").querySelectorAll("button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          api().set_theme(b.getAttribute("data-m"));
+          c.querySelector("#themeSeg").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
+        });
+      });
+      // 关闭窗口时 seg
+      c.querySelector("#closeActionSeg").querySelectorAll("button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          api().set_setting("close_action", b.getAttribute("data-m"));
+          c.querySelector("#closeActionSeg").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
+        });
+      });
+      return c;
+    }
+    function loadTheme() {
+      Promise.all([api().get_theme(), api().get_notifications(), api().get_setting("minimize_to_tray", false), api().get_clipboard(),
+        api().get_setting("restore_running", false), api().get_setting("auto_restart_crashed", false),
+        api().get_setting("close_action", "quit")])
+        .then(function (r) {
+          var mode = r[0] || "auto";
+          document.querySelectorAll("#themeSeg button").forEach(function (b) {
+            b.classList.toggle("on", b.getAttribute("data-m") === mode);
+          });
+          var closeAct = r[6] || "quit";
+          document.querySelectorAll("#closeActionSeg button").forEach(function (b) {
+            b.classList.toggle("on", b.getAttribute("data-m") === closeAct);
+          });
+          setChecked("notifChk", r[1]);
+          setChecked("trayChk", r[2]);
+          setChecked("clipChk", r[3]);
+          setChecked("restoreChk", r[4]);
+          setChecked("autoCrashChk", r[5]);
+        }).catch(function () {});
+      // 给开关补 id
+      var tg = document.querySelectorAll("#genToggles input");
+      if (tg[0]) tg[0].id = "notifChk";
+      if (tg[1]) tg[1].id = "trayChk";
+      if (tg[2]) tg[2].id = "clipChk";
+      if (tg[3]) tg[3].id = "restoreChk";
+      if (tg[4]) tg[4].id = "autoCrashChk";
+    }
+    function setChecked(id, v) { var e = document.getElementById(id); if (e) e.checked = !!v; }
+    function loadStats() {
+      Promise.resolve(api().get_database_stats()).then(function (s) {
+        var box = document.getElementById("dbStats");
+        if (box && s) box.textContent = P.T("stat_downloads") + "：" + s.downloads + " · " + P.T("stat_plugins") + "：" + s.plugins;
+      }).catch(function () {});
+    }
+
+    /* ---- 语言 ---- */
+    function languageCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("globe") + " " + P.T("grp_language") + "</h3>" +
+        '<div class="field" style="margin-top:10px"><label>' + P.T("lang_label") + "</label>" +
+        '<div class="seg" id="langSeg">' +
+        '<button data-l="zh">中文</button><button data-l="en">English</button></div></div></div>');
+      var seg = c.querySelector("#langSeg");
+      Promise.resolve(api().get_locale()).then(function (lc) {
+        seg.querySelectorAll("button").forEach(function (b) {
+          b.classList.toggle("on", b.getAttribute("data-l") === (lc || "zh"));
+        });
+      });
+      seg.querySelectorAll("button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var l = b.getAttribute("data-l");
+          api().set_locale(l);
+          seg.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
+          render();
+        });
+      });
+      return c;
+    }
+
+    /* ---- 代理 ---- */
+    function proxyCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("cloud") + " " + P.T("grp_proxy") + "</h3>" +
+        '<div class="field" style="margin-top:8px"><label>' + P.T("proxy_type_label") + "</label>" +
+        '<div class="seg" id="proxySeg">' +
+        '<button data-t="none">' + P.T("proxy_none") + "</button>" +
+        '<button data-t="http">HTTP</button><button data-t="socks5">SOCKS5</button></div></div>' +
+        '<div id="proxyFields" style="display:none">' +
+        '<div class="row"><div class="field" style="flex:2;margin:0"><label>' + P.T("proxy_host") + '</label><input class="input" id="proxyHost" /></div>' +
+        '<div class="field" style="flex:1;margin:0"><label>' + P.T("proxy_port") + '</label><input class="input" id="proxyPort" /></div></div>' +
+        '<div class="row" style="margin-top:8px"><div class="field" style="flex:1;margin:0"><label>' + P.T("proxy_user") + '</label><input class="input" id="proxyUser" /></div>' +
+        '<div class="field" style="flex:1;margin:0"><label>' + P.T("proxy_pass") + '</label><input class="input" id="proxyPass" type="password" /></div></div></div>' +
+        '<div class="row center" style="margin-top:12px"><button class="btn ghost" id="btnProxyTest">' + P.T("proxy_test") + "</button>" +
+        '<span id="proxyMsg" class="muted" style="font-size:13px"></span></div></div>');
+      var seg = c.querySelector("#proxySeg");
+      seg.querySelectorAll("button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          seg.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
+          var t = b.getAttribute("data-t");
+          c.querySelector("#proxyFields").style.display = (t === "none") ? "none" : "";
+          saveProxy(t);
+        });
+      });
+      ["proxyHost", "proxyPort", "proxyUser", "proxyPass"].forEach(function (id) {
+        c.querySelector("#" + id).addEventListener("change", function () {
+          saveProxy(seg.querySelector(".on") ? seg.querySelector(".on").getAttribute("data-t") : "none");
+        });
+      });
+      c.querySelector("#btnProxyTest").addEventListener("click", function () {
+        var msg = c.querySelector("#proxyMsg");
+        msg.textContent = P.T("proxy_testing");
+        var obj = readProxy(seg.querySelector(".on") ? seg.querySelector(".on").getAttribute("data-t") : "none");
+        Promise.resolve(api().test_proxy(obj)).then(function (r) {
+          if (r && r.ok) msg.textContent = P.T("proxy_ok") + (r.status ? " (" + r.status + ")" : "");
+          else msg.textContent = P.tfmt("proxy_fail", { error: (r && r.error) || "unknown" });
+        }).catch(function (e) { msg.textContent = P.tfmt("proxy_fail", { error: String(e) }); });
+      });
+      return c;
+    }
+    function readProxy(type) {
+      return {
+        type: type || "none",
+        host: (document.getElementById("proxyHost") || {}).value || "",
+        port: (document.getElementById("proxyPort") || {}).value || "",
+        user: (document.getElementById("proxyUser") || {}).value || "",
+        pass: (document.getElementById("proxyPass") || {}).value || "",
+      };
+    }
+    function saveProxy(type) {
+      Promise.resolve(api().set_proxy(readProxy(type))).catch(function () {});
+    }
+    function loadProxy() {
+      Promise.resolve(api().get_proxy()).then(function (p) {
+        p = p || {};
+        var seg = document.getElementById("proxySeg");
+        if (seg) seg.querySelectorAll("button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-t") === (p.type || "none")); });
+        var fields = document.getElementById("proxyFields");
+        if (fields) fields.style.display = (p.type && p.type !== "none") ? "" : "none";
+        setVal("proxyHost", p.host); setVal("proxyPort", p.port);
+        setVal("proxyUser", p.user); setVal("proxyPass", p.pass);
+      }).catch(function () {});
+    }
+    function setVal(id, v) { var e = document.getElementById(id); if (e) e.value = v || ""; }
+
+    /* ---- 全局快捷键 ---- */
+    function hotkeyCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("key") + " " + P.T("grp_hotkeys") + "</h3>" +
+        '<p class="hint">' + P.T("hotkey_hint") + "</p>" +
+        '<div class="row"><div class="field" style="flex:1;margin:0"><label>' + P.T("hotkey_current") + '</label>' +
+        '<input class="input" id="hkInput" placeholder="Ctrl+Shift+N" /></div></div>' +
+        '<div class="row center" style="margin-top:10px">' +
+        '<button class="btn ghost" id="hkApply">' + P.T("hotkey_label") + "</button>" +
+        '<button class="btn gray" id="hkReset">' + P.T("hotkey_reset") + "</button></div></div>");
+      c.querySelector("#hkApply").addEventListener("click", function () {
+        var v = c.querySelector("#hkInput").value.trim();
+        Promise.resolve(api().set_hotkey(v)).then(loadHotkey).catch(function () {});
+      });
+      c.querySelector("#hkReset").addEventListener("click", function () {
+        Promise.resolve(api().set_hotkey("Ctrl+Shift+N")).then(loadHotkey).catch(function () {});
+      });
+      return c;
+    }
+    function loadHotkey() {
+      Promise.resolve(api().get_hotkey()).then(function (v) {
+        var inp = document.getElementById("hkInput");
+        if (inp) inp.value = v || "";
+      }).catch(function () {});
+    }
+
+    /* ---- 数据备份 ---- */
+    function backupCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("cloud-up") + " " + P.T("grp_backup") + "</h3>" +
+        '<p class="hint">' + P.T("backup_desc") + "</p>" +
+        '<div class="row center" style="margin-top:6px">' +
+        '<button class="btn primary" id="btnExport">' + P.T("backup_export") + "</button>" +
+        '<button class="btn gray" id="btnImport">' + P.T("backup_import") + "</button></div>" +
+        '<div id="backupMsg" class="muted" style="font-size:13px;margin-top:10px"></div></div>');
+      c.querySelector("#btnExport").addEventListener("click", function () {
+        Promise.resolve(api().pick_folder()).then(function (dir) {
+          if (!dir) return;
+          Promise.resolve(api().export_data(dir)).then(function (r) {
+            if (r && r.ok) c.querySelector("#backupMsg").textContent = P.tfmt("backup_export_done", { path: r.path }) + " " + P.tfmt("backup_export_n", { n: r.count });
+            else c.querySelector("#backupMsg").textContent = (r && r.error) || "fail";
+          }).catch(function (e) { c.querySelector("#backupMsg").textContent = String(e); });
+        }).catch(function () {});
+      });
+      c.querySelector("#btnImport").addEventListener("click", function () {
+        Promise.resolve(api().pick_file()).then(function (path) {
+          if (!path) return;
+          Promise.resolve(api().import_data(path)).then(function (r) {
+            c.querySelector("#backupMsg").textContent = (r && r.ok) ? P.T("backup_import_done") : ((r && r.error) || "fail");
+          }).catch(function (e) { c.querySelector("#backupMsg").textContent = String(e); });
+        }).catch(function () {});
+      });
+      return c;
+    }
+
+    /* ---- 开机自启 ---- */
+    function autostartCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("power") + " " + P.T("grp_autostart") + "</h3>" +
+        '<div id="asToggle"></div>' +
+        '<div class="muted" style="font-size:12.5px;margin-top:6px">' + P.T("autostart_hint") + "</div></div>");
+      return c;
+    }
+    function loadAutostart() {
+      Promise.resolve(api().get_autostart()).then(function (on) {
+        var box = document.getElementById("asToggle");
+        if (!box) return;
+        box.innerHTML = "";
+        box.appendChild(toggleRow(P.T("autostart_label"), null, !!on, function (v) {
+          Promise.resolve(api().set_autostart(v)).then(function (real) {
+            loadAutostart();
+            if (v && !real) P.modal(P.T("grp_autostart"), P.T("autostart_unsupported"));
+          }).catch(function () {});
+        }));
+      }).catch(function () {});
+    }
+
+    /* ---- 组件管理 ---- */
+    function componentsCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("cloud") + " " + P.T("grp_components") + "</h3>" +
+        '<div class="list" id="compList"></div></div>');
+      return c;
+    }
+    function loadComponents() {
+      Promise.resolve(api().get_components()).then(renderComponents).catch(function () {});
+    }
+    function renderComponents(list) {
+      var box = document.getElementById("compList");
+      if (!box) return;
+      if (!list || !list.length) { box.innerHTML = '<div class="center-empty">' + P.T("no_history") + "</div>"; return; }
+      box.innerHTML = "";
+      list.forEach(function (cm) {
+        var row = P.el(
+          '<div class="list-row" data-cid="' + cm.id + '">' +
+          '<div class="icon" style="color:var(--accent)">' + P.icon("cloud") + "</div>" +
+          '<div class="grow"><div class="title">' + P.esc(cm.name) +
+          ' <span class="tag ' + (cm.installed ? "ok" : "no") + '">' + (cm.installed ? P.T("installed") : P.T("disabled")) + "</span></div>" +
+          '<div class="sub">' + P.esc(cm.desc || "") + "</div></div>" +
+          '<button class="btn sm gray">安装说明</button></div>');
+        row.querySelector("button").addEventListener("click", function () { P.modal(cm.name + " · 安装说明", powerShellHint(cm)); });
+        box.appendChild(row);
+      });
+    }
+    function powerShellHint(cm) {
+      return "本应用不提供内置安装，请以管理员身份打开 PowerShell，执行以下命令安装「" + cm.name + "」：\n\n" +
+        "命令一（winget，推荐）:\nwinget install Gyan.FFmpeg\n\n" +
+        "命令二（Chocolatey）:\nchoco install ffmpeg\n\n" +
+        "安装完成后，请完全重启本应用，并确保 FFmpeg 已加入系统 PATH。";
+    }
+    P.onPage("onComponentEvent", function (evt) {
+      if (!evt || !evt.id) return;
+      var row = document.querySelector('.list-row[data-cid="' + evt.id + '"]');
+      if (!row) return;
+      var bar = row.querySelector(".progress > i");
+      var log = row.querySelector(".comp-log");
+      if (evt.type === "progress") { if (bar) bar.style.width = (evt.percent || 0) + "%"; if (log) log.textContent = (evt.label || "") + (evt.percent != null ? " " + evt.percent + "%" : ""); }
+      else if (evt.type === "log") { if (log) log.textContent = evt.message; }
+      else if (evt.type === "done") { if (bar) bar.style.width = evt.ok ? "100%" : "0%"; if (log) log.textContent = evt.ok ? "OK" : ("失败：" + (evt.error || "")); }
+    });
+    P.onPage("onComponentsChanged", function (list) { renderComponents(list); });
+
+    /* ---- 插件管理（含生命周期） ---- */
+    function pluginsCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("puzzle") + " " + P.T("grp_plugins") + "</h3>" +
+        '<div class="list" id="plugList"></div></div>');
+      return c;
+    }
+    function loadPlugins() {
+      Promise.resolve(api().get_plugins()).then(renderPlugins).catch(function () {});
+    }
+    function healthDot(p) {
+      if (!p || p.running !== "running") return "";
+      var h = p.health || "ok";
+      var color = h === "ok" ? "#2ecc71" : (h === "warn" ? "#f0ad4e" : "#e74c3c");
+      var label = h === "ok" ? P.T("health_ok") : (h === "warn" ? P.T("health_warn") : P.T("health_dead"));
+      return ' <span class="health-dot" style="color:' + color + '" title="' + label + '">●</span>';
+    }
+    function stateBadge(st, p) {
+      if (st === "crashed") return '<span class="tag no" style="background:#e74c3c;color:#fff">' + P.T("crashed") + "</span>";
+      if (st === "running") return '<span class="tag ok">' + P.T("plugin_running") + healthDot(p) + "</span>";
+      if (st === "paused") return '<span class="tag wait">' + P.T("plugin_paused") + "</span>";
+      return '<span class="tag no">' + P.T("plugin_stopped") + "</span>";
+    }
+    function renderPlugins(list) {
+      var box = document.getElementById("plugList");
+      if (!box) return;
+      if (!list || !list.length) { box.innerHTML = '<div class="center-empty">' + P.T("no_market") + "</div>"; return; }
+      box.innerHTML = "";
+      list.forEach(function (p) {
+        var st = p.running || "stopped";
+        var row = P.el(
+          '<div class="list-row" data-pid="' + p.id + '">' +
+          '<div class="icon" style="color:var(--accent)">' + P.icon(p.icon || "puzzle") + "</div>" +
+          '<div class="grow"><div class="title">' + P.esc(p.name) +
+          (p.system ? ' <span class="tag wait">' + P.T("builtin") + "</span>" : (p.builtin ? ' <span class="tag wait">' + P.T("builtin") + "</span>" : "")) +
+          (p.incompatible ? ' <span class="tag no" title="' + P.esc(p.incompatible_reason || "") + '">' + P.T("incompatible") + "</span>" : "") +
+          (p.has_update ? ' <span class="tag no">' + P.T("has_update") + "</span>" : "") +
+          (p.dev ? ' <span class="tag wait">DEV</span>' : "") +
+          ' <span class="ver muted">v' + P.esc(p.version || "?") + "</span></div>" +
+          '<div class="sub">' + P.esc(p.description || "") + (p.author ? " · " + P.T("author") + "：" + P.esc(p.author) : "") + "</div>" +
+          (p.crashed && p.crash_reason ? '<div class="sub" style="color:#e74c3c;font-size:12px">' + P.esc(p.crash_reason) + "</div>" : "") +
+          (p.incompatible ? '<div class="sub" style="color:#e67e22;font-size:12px">' + P.esc(p.incompatible_reason || "") + "</div>" : "") +
+          '<div class="plug-status muted" style="font-size:12px;margin-top:4px">' + P.T("plugin_state_label") + "：" + stateBadge(st, p) + "</div></div>" +
+          '<div class="acts-col"></div></div>');
+        var acts = row.querySelector(".acts-col");
+        // 生命周期（不兼容插件不可启动）
+        if (p.incompatible) {
+          // 无操作按钮
+        } else if (st === "crashed") {
+          addBtn(acts, P.T("plugin_restart"), "btn sm", function () { api().restart_plugin(p.id); });
+          addBtn(acts, P.T("view_error_log"), "btn sm gray", function () {
+            Promise.resolve(api().get_plugin_log(p.id)).then(function (log) {
+              P.modal(p.name + " · " + P.T("view_error_log"), log || "(empty)");
+            }).catch(function () {});
+          });
+        } else if (st === "running") {
+          addBtn(acts, P.T("plugin_pause"), "btn sm gray", function () { api().pause_plugin(p.id); });
+          addBtn(acts, P.T("plugin_stop"), "btn sm", function () { api().stop_plugin(p.id); });
+        } else if (st === "paused") {
+          addBtn(acts, P.T("plugin_resume"), "btn sm", function () { api().resume_plugin(p.id); });
+          addBtn(acts, P.T("plugin_stop"), "btn sm gray", function () { api().stop_plugin(p.id); });
+        } else {
+          addBtn(acts, P.T("plugin_start"), "btn sm", function () { api().start_plugin(p.id); });
+        }
+        // 启用/禁用（基础插件不可禁用）
+        if (!p.system && !p.incompatible) {
+          if (p.enabled) addBtn(acts, P.T("disabled"), "btn sm gray", function () { api().set_plugin_enabled(p.id, false); });
+          else addBtn(acts, P.T("enabled"), "btn sm gray", function () { api().set_plugin_enabled(p.id, true); });
+        }
+        // 开发者：重新加载 / 日志
+        if (p.dev) {
+          addBtn(acts, P.T("dev_reload"), "btn sm gray", function () { api().reload_plugin(p.id); });
+          addBtn(acts, P.T("dev_open_log"), "btn sm gray", function () {
+            Promise.resolve(api().get_plugin_log(p.id)).then(function (log) {
+              P.modal(P.T("dev_open_log"), log || "(empty)");
+            }).catch(function () {});
+          });
+        }
+        // 更新 / 卸载（仅系统核心插件不可卸载；卸载前依赖检查 + 数据询问）
+        if (p.has_update) addBtn(acts, P.T("update"), "btn sm", function () { api().update_plugin(p.id); });
+        if (!p.system && !p.incompatible) addBtn(acts, P.T("uninstall"), "btn sm gray", function () {
+          var doUninstall = function (force) {
+            Promise.resolve(api().uninstall_plugin(p.id, force)).then(function (r) {
+              if (r && r.need_confirm) {
+                var names = (r.need_confirm || []).join(", ");
+                if (confirm(P.tfmt("uninstall_deps", { deps: names }))) doUninstall(true);
+              } else if (r && !r.ok && r.error) {
+                alert(r.error);
+              } else if (r && r.has_data) {
+                if (confirm(P.T("data_delete_confirm"))) {
+                  Promise.resolve(api().delete_plugin_data(p.id)).then(loadPlugins).catch(function () {});
+                } else { loadPlugins(); }
+              } else {
+                loadPlugins();
+              }
+            }).catch(function () {});
+          };
+          if (confirm(P.T("confirm_uninstall"))) doUninstall(false);
+        });
+        box.appendChild(row);
+      });
+    }
+    function addBtn(parent, label, cls, fn) {
+      var b = P.el('<button class="' + cls + '">' + P.esc(label) + "</button>");
+      b.addEventListener("click", fn);
+      parent.appendChild(b);
+    }
+    P.onPage("onPluginsChanged", function (list) { renderPlugins(list); loadMarket(); });
+    P.onPage("onPluginState", function () {
+      Promise.resolve(api().get_plugins()).then(renderPlugins).catch(function () {});
+    });
+    P.onPage("onPluginEvent", function (evt) {
+      if (!evt || !evt.id) return;
+      var row = document.querySelector('.list-row[data-pid="' + evt.id + '"]');
+      if (!row) return;
+      var st = row.querySelector(".plug-status");
+      if (!st) return;
+      if (evt.type === "progress") st.textContent = (evt.percent != null ? evt.percent + "%" : "");
+      else if (evt.type === "done") st.textContent = evt.ok ? P.T("installed") : ("失败：" + (evt.error || ""));
+    });
+
+    /* ---- 插件市场 ---- */
+    function marketCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("star") + " " + P.T("plugin_market") + "</h3>" +
+        '<p class="hint">' + P.T("welcome_again") + "</p>" +
+        '<div class="list" id="marketList"></div></div>');
+      return c;
+    }
+    function loadMarket() {
+      Promise.resolve(api().get_plugin_market()).then(renderMarket).catch(function () {
+        var box = document.getElementById("marketList");
+        if (box) box.innerHTML = '<div class="center-empty">' + P.T("no_market") + "</div>";
+      });
+    }
+    function renderMarket(list) {
+      var box = document.getElementById("marketList");
+      if (!box) return;
+      if (!list || !list.length) { box.innerHTML = '<div class="center-empty">' + P.T("no_market") + "</div>"; return; }
+      box.innerHTML = "";
+      list.forEach(function (m) {
+        var row = P.el(
+          '<div class="list-row" data-mid="' + (m.id || "") + '">' +
+          '<div class="icon" style="color:var(--accent)">' + P.icon(m.icon || "star") + "</div>" +
+          '<div class="grow"><div class="title">' + P.esc(m.name || m.id) +
+          ' <span class="ver muted">v' + P.esc(m.version || "?") + "</span></div>" +
+          '<div class="sub">' + P.esc(m.description || "") + (m.author ? " · " + P.T("author") + "：" + P.esc(m.author) : "") + "</div></div>" +
+          '<button class="btn sm ' + (m.installed ? "gray" : "primary") + '">' + (m.installed ? P.T("installed") : P.T("install")) + "</button></div>");
+        if (!m.installed) {
+          row.querySelector("button").addEventListener("click", function () { api().install_plugin(m); });
+        } else {
+          row.querySelector("button").setAttribute("disabled", "1");
+        }
+        box.appendChild(row);
+      });
+    }
+
+    /* ---- 开发者 ---- */
+    function developerCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("code") + " " + P.T("grp_developer") + "</h3>" +
+        '<div id="devToggle"></div>' +
+        '<p class="hint" style="margin-top:8px">' + P.T("dev_desc") + "</p>" +
+        '<div class="row center wrap" style="margin-top:6px">' +
+        '<button class="btn ghost" id="btnRescan">' + P.T("dev_rescan") + "</button>" +
+        '<button class="btn gray" id="btnDevDoc">' + P.T("dev_doc") + "</button>" +
+        '<button class="btn gray" id="btnRestoreDefault">' + P.T("restore_default") + "</button></div>" +
+        '<div class="list" id="devList" style="margin-top:12px"></div></div>');
+      c.querySelector("#btnRescan").addEventListener("click", function () { api().rescan_plugins(); loadDevPlugins(); });
+      c.querySelector("#btnDevDoc").addEventListener("click", function () { api().open_external_folder(""); P.modal(P.T("dev_doc"), "docs/plugin_development.md"); });
+      c.querySelector("#btnRestoreDefault").addEventListener("click", function () {
+        if (!confirm(P.T("restore_default"))) return;
+        Promise.resolve(api().restore_base_settings()).then(function (r) {
+          P.modal(P.T("restore_default"), (r && r.ok) ? P.T("restore_default_done") : ((r && r.error) || "?"));
+        }).catch(function () {});
+      });
+      return c;
+    }
+    function loadDevMode() {
+      Promise.resolve(api().get_dev_mode()).then(function (on) {
+        var box = document.getElementById("devToggle");
+        if (!box) return;
+        box.innerHTML = "";
+        box.appendChild(toggleRow(P.T("dev_mode_label"), P.T("dev_mode_hint"), !!on, function (v) {
+          Promise.resolve(api().set_dev_mode(v)).then(loadDevPlugins).catch(function () {});
+        }));
+        loadDevPlugins();
+      }).catch(function () {});
+    }
+    function loadDevPlugins() {
+      Promise.resolve(api().get_plugins()).then(function (list) {
+        var box = document.getElementById("devList");
+        if (!box) return;
+        var dev = (list || []).filter(function (p) { return p.dev; });
+        if (!dev.length) { box.innerHTML = '<div class="center-empty">' + P.T("no_history") + "</div>"; return; }
+        box.innerHTML = "";
+        dev.forEach(function (p) {
+          var row = P.el('<div class="list-row" data-pid="' + p.id + '">' +
+            '<div class="icon" style="color:var(--accent)">' + P.icon(p.icon || "code") + "</div>" +
+            '<div class="grow"><div class="title">' + P.esc(p.name) + ' <span class="ver muted">v' + P.esc(p.version || "?") + "</span></div>" +
+            '<div class="sub muted">' + P.esc(p.id) + "</div></div>" +
+            '<div class="acts-col">' +
+            '<button class="btn sm gray">' + P.T("dev_reload") + "</button>" +
+            '<button class="btn sm primary">' + P.T("plugin_start") + "</button>" +
+            '<button class="btn sm primary">' + P.T("plugin_stop") + "</button></div></div>");
+          var btns = row.querySelectorAll("button");
+          btns[0].addEventListener("click", function () { api().reload_plugin(p.id); });
+          btns[1].addEventListener("click", function () { api().start_plugin(p.id); });
+          btns[2].addEventListener("click", function () { api().stop_plugin(p.id); });
+          box.appendChild(row);
+        });
+      }).catch(function () {});
+    }
+
+    /* ---- 反馈 ---- */
+    function feedbackCard() {
+      var c = P.el('<div class="card"><h3>' + P.icon("megaphone") + " " + P.T("grp_feedback") + "</h3>" +
+        '<div class="field"><label>' + P.T("feedback_summary") + '</label><input class="input" id="fbSum" /></div>' +
+        '<div class="field"><label>' + P.T("feedback_desc") + '</label><textarea class="input" id="fbDesc"></textarea></div>' +
+        '<label class="check"><input type="checkbox" id="fbLog" checked /> ' + P.T("feedback_attach_log") + "</label>" +
+        '<div class="row center" style="margin-top:14px"><button class="btn primary" id="fbSubmit">' + P.T("feedback_submit") + "</button></div></div>");
+      c.querySelector("#fbSubmit").addEventListener("click", function () {
+        var payload = { summary: c.querySelector("#fbSum").value, description: c.querySelector("#fbDesc").value, include_log: c.querySelector("#fbLog").checked };
+        Promise.resolve(api().submit_feedback(payload)).then(function () {
+          P.modal(P.T("feedback_title"), P.T("ok"));
+        }).catch(function (e) { P.modal(P.T("crash_title"), String(e)); });
+      });
+      return c;
+    }
+
+    Page.boot(render);
+  })();
+  </script>
+</body>
+</html>

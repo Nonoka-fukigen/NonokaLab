@@ -1,0 +1,105 @@
+/* Nonoka_video_download 插件前端专属样式（复用 shell 的 Cupertino 变量） */
+/* body 变 flex 容器：让 .wrap 用 margin:auto 实现水平+垂直双居中，
+   窗口缩放时自动重新居中；内容超高时自动回退顶部对齐以支持滚动 */
+body { min-height: 100vh; display: flex; margin: 0; }
+.wrap { max-width: 760px; width: 100%; box-sizing: border-box;
+        margin: auto; padding: 24px 4px 40px; }
+.wrap > h2 { font-size: 22px; font-weight: 800; margin: 0 0 4px; text-align: center; }
+.wrap > .lead { color: var(--label-2); font-size: 13.5px; margin: 0 0 20px; text-align: center; }
+
+/* 运行状态条：居中排版 */
+.run-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+            gap: 10px; background: var(--bg-elevated); border-radius: var(--radius);
+            box-shadow: var(--shadow); padding: 14px 18px; margin-bottom: 16px; }
+.run-bar .icon { width: 26px; height: 26px; color: var(--accent); }
+.run-bar .muted { flex: 1 1 auto; text-align: center; }
+
+/* FFmpeg 提醒横幅：居中内容，可忽略 */
+.ffmpeg-banner {
+  display: flex; align-items: center; gap: 12px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  border-radius: var(--radius);
+  padding: 12px 14px; margin-bottom: 16px;
+}
+.ffmpeg-banner .icon { width: 22px; height: 22px; color: var(--accent); flex: none; }
+.ffmpeg-banner-body { flex: 1; min-width: 0; }
+.ffmpeg-banner-title { font-weight: 700; font-size: 14px; color: var(--label); }
+.ffmpeg-banner-text { font-size: 12.5px; color: var(--label-2); margin-top: 2px; }
+.ffmpeg-dismiss {
+  flex: none; width: 24px; height: 24px; border: none; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 25%, transparent); color: var(--accent-press);
+  font-size: 14px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.ffmpeg-dismiss:hover { background: color-mix(in srgb, var(--accent) 42%, transparent); }
+
+/* 分段控件行：水平居中，紧凑贴合内容，避免大段空白 */
+.seg-row { display: flex; justify-content: center; margin-bottom: 18px; }
+.seg-row .seg { display: inline-flex; max-width: 100%; }
+.seg-row .seg button {
+  min-width: 132px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+
+/* 下拉选择框：去除原生箭头，使用主题化 chevron */
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23808080' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.url-row { display: flex; gap: 10px; }
+.url-row .input { flex: 1; }
+
+/* 保存位置行：输入框占满剩余宽度，选择按钮文字保持横排 */
+#btnBrowse { min-width: 64px; white-space: nowrap; letter-spacing: 0; }
+#btnBrowse + #folder,
+.row #folder { flex: 1; min-width: 0; }
+
+/* 状态标签与主按钮等高 */
+.actions .tag, .run-bar .tag { font-size: 14px; padding: 8px 14px; border-radius: var(--radius-sm); }
+
+.opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 620px) { .opt-grid { grid-template-columns: 1fr; } }
+
+.cookie-area { display: none; }
+.cookie-area.show { display: block; }
+.qr-img { width: 200px; height: 200px; background: #fff; border-radius: var(--radius-sm); padding: 6px; }
+
+.tagline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.divider { height: 1px; background: var(--separator); margin: 18px 0; }
+
+/* 操作按钮组：居中 */
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.actions .tag { align-self: center; }
+
+/* 表单内按钮行居中 */
+.row.center { justify-content: center; }
+
+/* 插件运行状态 & 状态标签：统一主题色。运行=粉底白字，未运行/等待=粉字白底 */
+.tag.run { background: var(--accent, #ffbbcc); color: #fff; }
+.tag.stop { background: #fff; color: var(--accent, #ffbbcc); border: 1px solid var(--accent, #ffbbcc); }
+.tag.wait { background: #fff; color: var(--accent, #ffbbcc); border: 1px solid var(--accent, #ffbbcc); }
+.tag.ok { background: var(--accent, #ffbbcc); color: #fff; }
+
+/* 插件未运行：功能按钮/分段/下拉视觉置灰，但仍可点击以弹出「启动插件」提示。
+   刻意不用 pointer-events:none / disabled，否则点击提示无法弹出。 */
+.wrap.locked .btn,
+.wrap.locked .seg button,
+.wrap.locked select,
+.wrap.locked .ffmpeg-banner {
+  opacity: .55;
+  filter: saturate(.6);
+  cursor: not-allowed;
+}
+
+/* 自动识别徽标：内嵌平台图标，与 tag 同高 */
+.detect-row { display: flex; align-items: center; gap: 6px; }
+.detect-row .tag { display: inline-flex; align-items: center; gap: 5px; }
+.detect-row .tag .icon { width: 14px; height: 14px; }
+#urlDetect.tag.ok { background: var(--accent, #ffbbcc); color: #fff; }

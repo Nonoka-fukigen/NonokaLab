@@ -1,0 +1,9 @@
+# Nonoka Lab 运行时依赖
+# 打包/构建工具（PyInstaller、Inno Setup）不在此列，由 CI / 本地 build.py 单独安装。
+
+pywebview>=4.4          # 原生窗口（Windows 使用 WebView2 / Edge 内核，无需自带浏览器）
+requests>=2.31
+pillow>=10.0            # 封面清晰度增强、二维码图像
+opencv-python-headless>=4.8   # 封面超分（无界面版本，打包更小）
+qrcode>=7.4             # B站扫码登录二维码
+playwright>=1.40        # 抖音浏览器兜底解析（复用系统 Chrome / Edge）

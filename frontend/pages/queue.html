@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>任务队列 · Nonoka Lab</title>
+  <link rel="stylesheet" href="../css/cupertino.css?v=20260818" />
+</head>
+<body>
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <g id="icon-list" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h11M8 12h11M8 18h11"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></g>
+      <g id="icon-refresh" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-1.5 5"/><path d="M20 5v6h-6"/></g>
+      <g id="icon-x" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></g>
+      <g id="icon-up" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></g>
+      <g id="icon-down" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></g>
+      <g id="icon-pause" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5v14M15 5v14"/></g>
+      <g id="icon-play" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l12 7-12 7z"/></g>
+    </defs>
+  </svg>
+
+  <div class="page"></div>
+
+  <script src="../js/page.js"></script>
+  <script>
+  (function () {
+    var P = window.Page;
+    function api() { return P.api(); }
+    function T(k) { return P.T(k); }
+    function esc(s) { return P.esc(s); }
+    function icon(id) { return '<svg class="icon" aria-hidden="true"><use href="#' + id + '"/></svg>'; }
+
+    var _timer = null;
+
+    function render() {
+      var root = document.querySelector(".page");
+      root.innerHTML = "";
+      var head = document.createElement("div");
+      head.className = "card";
+      head.innerHTML =
+        '<div class="row" style="align-items:center;gap:10px">' +
+        '<div class="icon" style="color:var(--accent)">' + icon("list") + "</div>" +
+        '<h3 style="margin:0;flex:1">' + esc(T("nav_queue")) + '</h3>' +
+        '<button class="btn gray" id="btnPauseAll">' + esc(T("queue_pause_all")) + "</button>" +
+        '<button class="btn gray" id="btnResumeAll">' + esc(T("queue_resume_all")) + "</button>" +
+        '<button class="btn ghost" id="btnRefresh">' + icon("refresh") + " " + esc(T("queue_refresh")) + "</button></div>" +
+        '<div class="list" id="queueList" style="margin-top:12px"></div>';
+      root.appendChild(head);
+
+      head.querySelector("#btnPauseAll").addEventListener("click", function () { api().queue_action("pause"); refresh(); });
+      head.querySelector("#btnResumeAll").addEventListener("click", function () { api().queue_action("resume"); refresh(); });
+      head.querySelector("#btnRefresh").addEventListener("click", refresh);
+
+      startTimer();
+      refresh();
+    }
+
+    function startTimer() {
+      stopTimer();
+      _timer = setInterval(refresh, 1500);
+    }
+    function stopTimer() { if (_timer) { clearInterval(_timer); _timer = null; } }
+
+    function statusBadge(st) {
+      var map = {
+        queued: ["wait", T("queue_status_queued")], running: ["ok", T("queue_status_running")],
+        done: ["ok", T("queue_status_done")], failed: ["no", T("queue_status_failed")],
+        cancelled: ["no", T("queue_status_cancelled")], paused: ["wait", T("queue_status_paused")],
+      };
+      var m = map[st] || ["wait", st];
+      return '<span class="tag ' + m[0] + '">' + esc(m[1]) + "</span>";
+    }
+
+    function refresh() {
+      Promise.resolve(api().get_queue()).then(renderList).catch(function () {});
+    }
+
+    function renderList(tasks) {
+      tasks = tasks || [];
+      var box = document.getElementById("queueList");
+      if (!box) return;
+      if (!tasks.length) { box.innerHTML = '<div class="center-empty">' + esc(T("queue_empty")) + "</div>"; return; }
+      box.innerHTML = "";
+      tasks.forEach(function (t) {
+        var row = document.createElement("div");
+        row.className = "list-row";
+        row.innerHTML =
+          '<div class="icon" style="color:var(--accent)">' + icon("list") + "</div>" +
+          '<div class="grow"><div class="title">' + esc(t.title || t.kind || t.id) + "</div>" +
+          '<div class="sub">' + esc(t.plugin_id || "") + (t.message ? " · " + esc(t.message) : "") + "</div>" +
+          '<div class="progress" style="margin-top:8px"><i style="width:' + (t.percent || 0) + '%"></i></div></div>' +
+          '<div class="row" style="align-items:center;gap:8px">' + statusBadge(t.status) +
+          '<div class="acts-col">' +
+          '<button class="btn sm gray" data-act="up" title="' + esc(T("queue_up")) + '">' + icon("up") + "</button>" +
+          '<button class="btn sm gray" data-act="down" title="' + esc(T("queue_down")) + '">' + icon("down") + "</button>" +
+          '<button class="btn sm gray" data-act="cancel" title="' + esc(T("queue_cancel")) + '">' + icon("x") + "</button>" +
+          "</div></div>";
+        row.querySelector('[data-act="up"]').addEventListener("click", function () { api().queue_action("move_up", t.id); refresh(); });
+        row.querySelector('[data-act="down"]').addEventListener("click", function () { api().queue_action("move_down", t.id); refresh(); });
+        row.querySelector('[data-act="cancel"]').addEventListener("click", function () {
+          if (t.status === "running" || t.status === "queued") { api().queue_action("cancel", t.id); refresh(); }
+        });
+        box.appendChild(row);
+      });
+    }
+
+    Page.boot(render);
+    // 离开页面停止自动刷新
+    window.addEventListener("pagehide", stopTimer);
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) stopTimer(); else if (document.querySelector(".page") && document.querySelector(".page").innerHTML) startTimer();
+    });
+  })();
+  </script>
+</body>
+</html>

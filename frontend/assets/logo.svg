@@ -1,0 +1,21 @@
+<!-- Nonoka Lab 像素兔子头 Logo（品牌色 #ffbbcc，45° 倾斜，无白底/无额外图标） -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"
+     shape-rendering="crispEdges">
+  <g transform="rotate(45 60 60)" fill="#ffbbcc">
+    <!-- 耳朵 -->
+    <rect x="20" y="0" width="20" height="40"/>
+    <rect x="80" y="0" width="20" height="40"/>
+    <!-- 头 -->
+    <rect x="10" y="30" width="40" height="20"/>
+    <rect x="70" y="30" width="40" height="20"/>
+    <rect x="20" y="40" width="80" height="40"/>
+    <rect x="20" y="70" width="80" height="20"/>
+    <rect x="40" y="90" width="40" height="20"/>
+    <!-- 内耳（同色系略深，增加层次） -->
+    <rect x="28" y="14" width="8" height="22" fill="#f7a8c0"/>
+    <rect x="84" y="14" width="8" height="22" fill="#f7a8c0"/>
+    <!-- 眼睛（同色系略深） -->
+    <rect x="44" y="56" width="9" height="9" fill="#f7a8c0"/>
+    <rect x="67" y="56" width="9" height="9" fill="#f7a8c0"/>
+  </g>
+</svg>

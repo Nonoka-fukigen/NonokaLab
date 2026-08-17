@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>开发者 · Nonoka Lab</title>
+  <link rel="stylesheet" href="../css/cupertino.css?v=20260818" />
+</head>
+<body>
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <g id="icon-code" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></g>
+      <g id="icon-refresh" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-1.5 5"/><path d="M20 5v6h-6"/></g>
+      <g id="icon-puzzle" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4h4a2 2 0 0 1 4 0v2a2 2 0 0 0 2 2 2 2 0 0 1 0 4 2 2 0 0 0-2 2v2a2 2 0 0 1-4 0h-4a2 2 0 0 1 0-4 2 2 0 0 0-2-2 2 2 0 0 1 0-4 2 2 0 0 0 2-2V6a2 2 0 0 1 0-2z"/></g>
+      <g id="icon-eye" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></g>
+      <g id="icon-play" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l12 7-12 7z"/></g>
+      <g id="icon-stop" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></g>
+    </defs>
+  </svg>
+
+  <div class="page"></div>
+
+  <script src="../js/page.js"></script>
+  <script>
+  (function () {
+    var P = window.Page;
+    function api() { return P.api(); }
+    function T(k) { return P.T(k); }
+    function esc(s) { return P.esc(s); }
+    function icon(id) { return '<svg class="icon" aria-hidden="true"><use href="#' + id + '"/></svg>'; }
+
+    function render() {
+      var root = document.querySelector(".page");
+      root.innerHTML = "";
+      var head = document.createElement("div");
+      head.className = "card";
+      head.innerHTML =
+        '<div class="row" style="align-items:center;gap:10px">' +
+        '<div class="icon" style="color:var(--accent)">' + icon("code") + "</div>" +
+        '<h3 style="margin:0;flex:1">' + esc(T("nav_dev")) + '</h3>' +
+        '<button class="btn ghost" id="btnRescan">' + icon("refresh") + " " + esc(T("dev_rescan")) + "</button>" +
+        '<button class="btn gray" id="btnDoc">' + esc(T("dev_doc")) + "</button></div>" +
+        '<p class="hint" style="margin-top:8px">' + esc(T("dev_desc")) + "</p>" +
+        '<div class="list" id="devList" style="margin-top:12px"></div>';
+      root.appendChild(head);
+      head.querySelector("#btnRescan").addEventListener("click", function () { api().rescan_plugins(); load(); });
+      head.querySelector("#btnDoc").addEventListener("click", function () { P.modal(T("dev_doc"), "docs/plugin_development.md"); });
+      load();
+      // 事件追踪面板（实时刷新）
+      var ev = P.el('<div class="card" style="margin-top:14px"><h3>' + icon("eye") + " " + esc(T("event_panel")) + "</h3>" +
+        '<div class="muted" style="font-size:12px;margin:6px 0">' + esc(T("event_panel_empty")) + "</div>" +
+        '<div id="eventBox" style="font-family:ui-monospace,Consolas,monospace;font-size:12px;max-height:300px;overflow:auto;background:var(--fill-2);border-radius:10px;padding:10px 12px"></div></div>');
+      root.appendChild(ev);
+      loadEvents();
+      setInterval(loadEvents, 3000);
+    }
+
+    function loadEvents() {
+      Promise.resolve(api().get_event_trace(100)).then(function (list) {
+        var box = document.getElementById("eventBox");
+        if (!box) return;
+        if (!list || !list.length) { box.innerHTML = '<span class="muted">' + esc(T("event_panel_empty")) + "</span>"; return; }
+        var html = list.map(function (e) {
+          var d = new Date((e.time || 0) * 1000);
+          var ts = d.toLocaleTimeString();
+          return '<div><span style="color:var(--green)">[' + esc(e.trace_id) + "]</span> " +
+            '<span class="muted">' + esc(ts) + "</span> <b>" + esc(e.topic) + "</b> " +
+            '<span class="muted">' + esc(e.data || "") + "</span></div>";
+        }).join("");
+        box.innerHTML = html;
+      }).catch(function () {});
+    }
+
+    function healthDot(p) {
+      if (!p || p.running !== "running") return "";
+      var h = p.health || "ok";
+      var color = h === "ok" ? "#2ecc71" : (h === "warn" ? "#f0ad4e" : "#e74c3c");
+      var label = h === "ok" ? T("health_ok") : (h === "warn" ? T("health_warn") : T("health_dead"));
+      return ' <span class="health-dot" style="color:' + color + '" title="' + label + '">●</span>';
+    }
+    function stateBadge(st, p) {
+      if (st === "running") return '<span class="tag ok">' + esc(T("plugin_running")) + healthDot(p) + "</span>";
+      if (st === "paused") return '<span class="tag wait">' + esc(T("plugin_paused")) + "</span>";
+      return '<span class="tag no">' + esc(T("plugin_stopped")) + "</span>";
+    }
+
+    function load() {
+      Promise.resolve(api().get_plugins()).then(function (list) {
+        var box = document.getElementById("devList");
+        if (!box) return;
+        var dev = (list || []).filter(function (p) { return p.dev; });
+        if (!dev.length) { box.innerHTML = '<div class="center-empty">' + esc(T("no_history")) + "</div>"; return; }
+        box.innerHTML = "";
+        dev.forEach(function (p) {
+          var st = p.running || "stopped";
+          var row = document.createElement("div");
+          row.className = "list-row";
+          row.innerHTML =
+            '<div class="icon" style="color:var(--accent)">' + icon(p.icon || "code") + "</div>" +
+            '<div class="grow"><div class="title">' + esc(p.name) + ' <span class="ver muted">v' + esc(p.version || "?") + "</span> " + stateBadge(st, p) + "</div>" +
+            '<div class="sub muted">' + esc(p.id) + "</div>" +
+            '<div class="sub muted" style="font-size:12px;margin-top:3px">' + esc(T("plugin_state_label")) + "：" + esc(st) + "</div></div>" +
+            '<div class="acts-col">' +
+            (st === "running"
+              ? '<button class="btn sm primary" data-act="stop">' + esc(T("plugin_stop")) + "</button>"
+              : '<button class="btn sm primary" data-act="start">' + esc(T("plugin_start")) + "</button>") +
+            '<button class="btn sm gray" data-act="reload">' + esc(T("dev_reload")) + "</button>" +
+            '<button class="btn sm gray" data-act="log">' + esc(T("dev_open_log")) + "</button>" +
+            "</div>";
+          if (st === "running") {
+            row.querySelector('[data-act="stop"]').addEventListener("click", function () { api().stop_plugin(p.id); load(); });
+          } else {
+            row.querySelector('[data-act="start"]').addEventListener("click", function () { api().start_plugin(p.id); load(); });
+          }
+          row.querySelector('[data-act="reload"]').addEventListener("click", function () { api().reload_plugin(p.id); load(); });
+          row.querySelector('[data-act="log"]').addEventListener("click", function () {
+            Promise.resolve(api().get_plugin_log(p.id)).then(function (log) { P.modal(T("dev_open_log"), log || "(empty)"); }).catch(function () {});
+          });
+          box.appendChild(row);
+        });
+      }).catch(function () {});
+    }
+
+    Page.boot(render);
+  })();
+  </script>
+</body>
+</html>

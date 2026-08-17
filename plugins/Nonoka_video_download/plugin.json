@@ -1,0 +1,18 @@
+{
+  "id": "Nonoka_video_download",
+  "name": "视频下载",
+  "version": "1.0.0",
+  "config_version": 1,
+  "core_version_min": "1.0.0",
+  "repo": "nonoka-lab/nonoka-lab",
+  "author": "Nonoka",
+  "description": "下载 B站 / 抖音 的视频、音频与封面，支持清晰度增强",
+  "icon": "video",
+  "provides": ["download_video", "download_audio", "download_cover", "parse_video"],
+  "consumes": ["ffmpeg_component"],
+  "permissions": ["network_access", "file_write"],
+  "sha256": "",
+  "dependencies": ["ffmpeg"],
+  "builtin": true,
+  "download": ""
+}

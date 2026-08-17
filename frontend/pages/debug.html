@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>调试工具 · Nonoka Lab</title>
+  <link rel="stylesheet" href="../css/cupertino.css?v=20260818" />
+</head>
+<body>
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <g id="icon-eye" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></g>
+      <g id="icon-code" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></g>
+      <g id="icon-refresh" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-1.5 5"/><path d="M20 5v6h-6"/></g>
+    </defs>
+  </svg>
+
+  <div class="page"></div>
+
+  <script src="../js/page.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var P = window.Page;
+    var api = P.api, T = P.T, esc = P.esc, el = P.el, icon = P.icon;
+
+    function render() {
+      var root = document.querySelector(".page");
+      root.innerHTML = "";
+      root.appendChild(el(
+        '<div class="card">' +
+        '<div class="row" style="align-items:center;gap:10px;justify-content:center">' +
+        '<div class="icon" style="color:var(--accent)">' + icon("eye") + "</div>" +
+        '<h3 style="margin:0">' + esc(T("debug_title")) + "</h3></div>" +
+        '<p class="hint" style="margin-top:8px;text-align:center">' + esc(T("debug_desc")) + "</p>" +
+        '<div class="row center wrap" style="margin-top:14px">' +
+        '<button class="btn primary" id="btnOpen">' + icon("code") + " " + esc(T("open_devtools")) + "</button></div>" +
+        '<div id="dbgMsg" class="muted" style="font-size:13px;margin-top:12px;text-align:center"></div>' +
+        "</div>"
+      ));
+      root.querySelector("#btnOpen").addEventListener("click", function () {
+        var msg = document.getElementById("dbgMsg");
+        msg.textContent = esc(T("debug_opening"));
+        Promise.resolve(api().open_debug_tools()).then(function (r) {
+          msg.textContent = (r && r.ok) ? esc(T("debug_opened")) : esc((r && r.error) || T("open_devtools_err"));
+        }).catch(function (e) {
+          msg.textContent = esc(T("open_devtools_err")) + ": " + esc(String(e && e.message ? e.message : e));
+        });
+      });
+    }
+
+    Page.boot(render);
+  })();
+  </script>
+</body>
+</html>

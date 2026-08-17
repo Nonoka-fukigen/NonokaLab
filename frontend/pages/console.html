@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>控制台 · Nonoka Lab</title>
+  <link rel="stylesheet" href="../css/cupertino.css?v=20260818" />
+  <style>
+    .page { padding: 18px 4px 40px; max-width: 900px; margin: 0 auto; }
+    .c-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
+    .c-head h3 { margin: 0; flex: 1; min-width: 120px; text-align: left; }
+    .c-head .filters { display: inline-flex; }
+    .c-head .filters button { min-width: 60px; }
+    .c-head .filters button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .c-tools { display: inline-flex; gap: 8px; align-items: center; }
+    .c-count { color: var(--label-3); font-size: 12px; margin-right: 4px; }
+    .c-desc { text-align: center; color: var(--label-2); font-size: 13px; margin: 8px 0 14px; }
+    #logBox {
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+      font-size: 12px; line-height: 1.55;
+      background: var(--fill-2); border-radius: 12px; border: 1px solid var(--separator);
+      padding: 10px 12px; height: 60vh; overflow: auto; white-space: pre-wrap; word-break: break-all;
+    }
+    .logrow { display: flex; gap: 8px; align-items: baseline; padding: 1px 0; }
+    .logrow .lt { color: var(--label-3); flex: none; }
+    .logrow .ll { flex: none; min-width: 34px; text-align: center; }
+    .logrow .ln { color: var(--label-2); flex: none; max-width: 30%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .logrow .lm { flex: 1; min-width: 0; }
+    .lv-err .ll { color: #e53935; font-weight: 700; }
+    .lv-err .lm { color: #c62828; }
+    .lv-warn .ll { color: #ef8e00; font-weight: 700; }
+    .lv-warn .lm { color: #8a5b00; }
+    .lv-info .ll { color: var(--accent); }
+    .lv-debug .ll { color: var(--label-3); }
+    .lv-debug .lm { color: var(--label-3); }
+    :root[data-theme="dark"] .lv-err .lm { color: #ff8a80; }
+    :root[data-theme="dark"] .lv-warn .lm { color: #ffcc80; }
+    .c-tip { text-align: center; color: var(--label-3); font-size: 12px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="page"></div>
+
+  <script src="../js/page.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var P = window.Page;
+    var api = P.api, T = P.T, esc = P.esc, el = P.el;
+
+    var logs = [];          // 全部日志记录（最多保留 _MAX_LOGS 条，防无限增长/卡死）
+    var _MAX_LOGS = 600;
+    var filter = "ALL";     // ALL | ERROR | WARNING | INFO
+    var autoScroll = true;
+    var lastSeq = 0;
+    var jsSeq = 0;
+    var loadError = "";     // 拉取失败时的提示
+    var flushTimer = null;  // 渲染 debounce 句柄
+
+    // 合并短时间内到达的多条日志，合并渲染 DOM，避免高频日志逐条重建导致 UI 卡顿。
+    function scheduleFlush() {
+      if (flushTimer) return;
+      flushTimer = setTimeout(function () { flushTimer = null; flush(); }, 80);
+    }
+
+    function pad(n) { return n < 10 ? "0" + n : "" + n; }
+    function fmtTime(t) {
+      var d = new Date(t || Date.now());
+      return pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()) + "." + String(d.getMilliseconds());
+    }
+    function levelClass(lv) {
+      if (lv === "ERROR") return "lv-err";
+      if (lv === "WARNING") return "lv-warn";
+      if (lv === "DEBUG") return "lv-debug";
+      return "lv-info";
+    }
+    function levelLabel(lv) { return T("console_level_" + lv) || lv; }
+
+    function visible() {
+      return logs.filter(function (l) { return filter === "ALL" || l.level === filter; });
+    }
+
+    function flush() {
+      var box = document.getElementById("logBox");
+      if (!box) return;
+      var list = visible();
+      if (!list.length) {
+        box.innerHTML = '<div class="muted" style="padding:12px">' +
+          (loadError ? '<span style="color:#e53935">' + esc(loadError) + "</span><br/>" : "") +
+          esc(T("console_empty")) + "</div>";
+        return;
+      }
+      var html = list.map(function (l) {
+        return '<div class="logrow ' + levelClass(l.level) + '">' +
+          '<span class="lt">' + esc(fmtTime(l.t)) + "</span>" +
+          '<span class="ll">' + esc(levelLabel(l.level)) + "</span>" +
+          '<span class="ln">' + esc(l.name || "") + "</span>" +
+          '<span class="lm">' + esc(String(l.msg || "")) + "</span></div>";
+      }).join("");
+      box.innerHTML = html;
+      if (autoScroll) box.scrollTop = box.scrollHeight;
+    }
+
+    function loadHistory() {
+      loadError = "";
+      api().get_console_logs(0, 300).then(function (r) {
+        r = r || {};
+        addLogs(r.records || []);
+        var c = document.getElementById("logCount");
+        if (c) c.textContent = logs.length + " " + T("console_count");
+      }).catch(function (e) {
+        loadError = T("console_load_err") + ": " + String(e && e.message ? e.message : e);
+        flush();
+      });
+    }
+
+    function addLogs(records) {
+      records = records || [];
+      records.forEach(function (r) {
+        logs.push({ seq: r.seq, t: r.t, level: r.level, name: r.name, msg: r.msg, src: "py" });
+      });
+      if (logs.length > _MAX_LOGS) logs = logs.slice(-_MAX_LOGS);
+      if (records.length) lastSeq = records[records.length - 1].seq;
+      scheduleFlush();
+    }
+
+    function addJs(level, msg) {
+      jsSeq++;
+      logs.push({ seq: "J" + jsSeq, t: Date.now(), level: level, name: "[前端]", msg: msg, src: "js" });
+      if (logs.length > _MAX_LOGS) logs = logs.slice(-_MAX_LOGS);
+      scheduleFlush();
+    }
+
+    function clearAll() { logs = []; flush(); }
+
+    function copyAll() {
+      var text = visible().map(function (l) {
+        return "[" + fmtTime(l.t) + "] [" + l.level + "] " + (l.name || "") + ": " + (l.msg || "");
+      }).join("\n");
+      if (!text) return;
+      var done = false;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done = true; flashCopy(); }).catch(function () { fallbackCopy(text); });
+      } else {
+        fallbackCopy(text);
+      }
+    }
+    function fallbackCopy(text) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); flashCopy(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+    function flashCopy() {
+      var b = document.getElementById("btnCopy");
+      if (!b) return;
+      var old = b.textContent;
+      b.textContent = T("console_copy_ok");
+      setTimeout(function () { b.textContent = old; }, 1200);
+    }
+
+    function render() {
+      var root = document.querySelector(".page");
+      root.innerHTML = "";
+      root.appendChild(el(
+        '<div class="card"><div class="c-head">' +
+        '<h3>' + esc(T("console_title")) + "</h3>" +
+        '<div class="filters" id="filters">' +
+        '<button data-f="ALL" class="btn sm on">' + esc(T("console_filter_all")) + "</button>" +
+        '<button data-f="ERROR" class="btn sm">' + esc(T("console_filter_error")) + "</button>" +
+        '<button data-f="WARNING" class="btn sm">' + esc(T("console_filter_warn")) + "</button>" +
+        '<button data-f="INFO" class="btn sm">' + esc(T("console_filter_info")) + "</button>" +
+        "</div>" +
+        '<div class="c-tools">' +
+        '<span class="c-count" id="logCount">0 ' + esc(T("console_count")) + "</span>" +
+        '<button class="btn sm ghost" id="btnRefresh">' + esc(T("console_refresh")) + "</button>" +
+        '<button class="btn sm ghost" id="btnClear">' + esc(T("console_clear")) + "</button>" +
+        '<button class="btn sm ghost" id="btnCopy">' + esc(T("console_copy")) + "</button>" +
+        '<button class="btn sm ghost" id="btnScroll">' + esc(T("console_auto_scroll")) + "</button>" +
+        "</div></div>" +
+        '<p class="c-desc">' + esc(T("console_desc")) + "</p>" +
+        '<div id="logBox"></div>' +
+        '<p class="c-tip">' + esc(T("console_auto_scroll")) + (autoScroll ? "：开" : "：关") + "</p>" +
+        "</div>"
+      ));
+
+      root.querySelectorAll("#filters button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          filter = b.getAttribute("data-f");
+          root.querySelectorAll("#filters button").forEach(function (x) { x.classList.toggle("on", x === b); });
+          flush();
+        });
+      });
+      root.querySelector("#btnClear").addEventListener("click", clearAll);
+      root.querySelector("#btnRefresh").addEventListener("click", loadHistory);
+      root.querySelector("#btnCopy").addEventListener("click", copyAll);
+      root.querySelector("#btnScroll").addEventListener("click", function () {
+        autoScroll = !autoScroll;
+        var tip = root.querySelector(".c-tip");
+        if (tip) tip.textContent = esc(T("console_auto_scroll")) + (autoScroll ? "：开" : "：关");
+        if (autoScroll) flush();
+      });
+
+      // 前端错误捕获（展示在本控制台，不依赖 Python）
+      window.addEventListener("error", function (e) {
+        addJs("ERROR", T("console_js_error") + ": " + (e.message || "unknown"));
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        var r = e.reason;
+        addJs("ERROR", T("console_js_rejection") + ": " + String(r && r.message ? r.message : r));
+      });
+
+      // 首次拉取历史日志
+      flush();
+      loadHistory();
+    }
+
+    // Python 实时推送的新日志
+    P.onPage("onConsoleLog", addLogs);
+
+    P.boot(render);
+  })();
+  </script>
+</body>
+</html>

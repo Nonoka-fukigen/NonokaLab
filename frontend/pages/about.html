@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>关于 · Nonoka Lab</title>
+  <link rel="stylesheet" href="../css/cupertino.css?v=20260818" />
+</head>
+<body>
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <g id="icon-info" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/></g>
+      <g id="icon-refresh" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-1.5 5"/><path d="M20 5v6h-6"/></g>
+      <g id="icon-megaphone" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4a1 1 0 0 0 1 1h2l8 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M18 9a3 3 0 0 1 0 6"/></g>
+      <g id="icon-clock" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></g>
+    </defs>
+  </svg>
+
+  <div class="page">
+    <div class="card" id="aboutCard"></div>
+    <div class="card" id="statsCard"></div>
+  </div>
+
+  <script src="../js/page.js"></script>
+  <script>
+  (function () {
+    var P = window.Page;
+    function api() { return P.api(); }
+
+    function render() {
+      Promise.resolve(api().get_brand()).then(function (brand) {
+        var card = document.getElementById("aboutCard");
+        card.innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:center;gap:14px">' +
+          '<img src="../assets/logo.svg" alt="logo" style="width:48px;height:48px" />' +
+          '<div><div style="font-size:20px;font-weight:700">' + P.esc(brand.app_name) + "</div>" +
+          '<div class="muted" style="font-size:13px">' + P.T("about_version") + ' <span id="verText" style="cursor:pointer;color:var(--accent-press)">v' + P.esc(brand.version) + "</span> · " +
+          P.T("about_publisher") + "：" + P.esc(brand.publisher) + "</div></div></div>" +
+          '<div class="row center wrap" style="margin-top:16px">' +
+          '<button class="btn ghost" id="btnCheck">' + P.T("about_check_update") + "</button>" +
+          '<button class="btn gray" id="btnFeedback">' + P.T("about_feedback") + "</button>" +
+          '<button class="btn gray" id="btnRepo">' + P.T("nav_about") + "</button></div>" +
+          '<div class="card" style="margin-top:16px;background:var(--fill-2)"><h3>' + P.T("about_disclaimer") + "</h3>" +
+          '<p class="hint" style="white-space:pre-wrap;line-height:1.7">' + P.esc(P.T("disclaimer_text")) + "</p></div>";
+        // 彩蛋：连续点击版本号 3 次切换开发者模式（带视觉反馈）
+        var ver = card.querySelector("#verText");
+        var clicks = 0, timer = null;
+        ver.addEventListener("click", function () {
+          clicks++;
+          ver.classList.remove("shake");
+          void ver.offsetWidth;  // 重启动画
+          ver.classList.add("shake");
+          clearTimeout(timer);
+          timer = setTimeout(function () { clicks = 0; }, 1200);
+          if (clicks >= 3) {
+            clicks = 0;
+            Promise.resolve(api().get_dev_mode()).then(function (dev) {
+              return api().set_dev_mode(!dev);
+            }).then(function () {
+              try { window.parent.postMessage({ __nonoka_nav_refresh: true }, "*"); } catch (e) {}
+              return api().get_dev_mode();
+            }).then(function (v) {
+              P.modal(P.T("nav_dev"), v ? P.T("dev_mode_warning") : P.T("dev_mode_label") + " OFF");
+            }).catch(function () {});
+          }
+        });
+        card.querySelector("#btnCheck").addEventListener("click", function () {
+          Promise.resolve(api().check_update()).then(function (info) {
+            if (info.update_available) {
+              P.modal(P.tfmt("new_version", { latest: info.latest }),
+                P.tfmt("new_version_body", { current: info.current, notes: info.notes || "" }),
+                [{ label: P.T("ok"), href: info.url }]);
+            } else {
+              P.modal(P.T("latest"), P.tfmt("latest_body", { current: info.current }));
+            }
+          }).catch(function (e) { P.modal(P.T("crash_title"), String(e)); });
+        });
+        card.querySelector("#btnFeedback").addEventListener("click", function () {
+          P.modal(P.T("feedback_title"),
+            P.esc(P.T("feedback_desc")),
+            [{ label: P.T("feedback_submit"), onClick: function () { api().submit_feedback({ summary: "", description: "", include_log: false }); } },
+             { label: P.T("ok"), cls: "btn gray" }]);
+        });
+        card.querySelector("#btnRepo").addEventListener("click", function () {
+          window.open(brand.repo_url, "_blank");
+        });
+      }).catch(function (e) { P.modal(P.T("crash_title"), String(e)); });
+
+      loadStats();
+    }
+
+    function loadStats() {
+      Promise.resolve(api().get_stats()).then(function (s) {
+        s = s || {};
+        var byType = s.by_type || {};
+        var typeStr = Object.keys(byType).map(function (k) { return k + "：" + byType[k]; }).join("，") || "—";
+        var card = document.getElementById("statsCard");
+        card.innerHTML =
+          "<h3>" + P.icon("clock") + " " + P.T("about_usage") + "</h3>" +
+          '<div class="row wrap" style="margin-top:6px">' +
+          statBox(P.T("stat_downloads"), s.downloads || 0) +
+          statBox(P.T("stat_plugins_enabled"), s.plugins_enabled || 0) +
+          statBox(P.T("stat_days"), s.days || 0) + "</div>" +
+          '<div class="muted" style="margin-top:10px;font-size:13px">' + P.T("stat_by_type") + "：" + P.esc(typeStr) + "</div>";
+      }).catch(function () {});
+    }
+    function statBox(label, val) {
+      return '<div style="flex:1;min-width:120px;background:var(--fill-2);border-radius:12px;padding:12px 14px">' +
+        '<div style="font-size:22px;font-weight:700;color:var(--accent-press)">' + val + "</div>" +
+        '<div class="muted" style="font-size:12px">' + P.esc(label) + "</div></div>";
+    }
+
+    Page.boot(render);
+  })();
+  </script>
+</body>
+</html>

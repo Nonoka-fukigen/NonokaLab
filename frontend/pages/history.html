@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>下载历史 · Nonoka Lab</title>
+  <link rel="stylesheet" href="../css/cupertino.css?v=20260818" />
+</head>
+<body>
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <g id="icon-clock" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></g>
+      <g id="icon-search" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></g>
+      <g id="icon-folder" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></g>
+      <g id="icon-download" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 4 5-4"/><path d="M4 19h16"/></g>
+      <g id="icon-refresh" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-1.5 5"/><path d="M20 5v6h-6"/></g>
+      <g id="icon-x" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></g>
+      <g id="icon-video" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="3"/><path d="M16 10.5 21 7.5v9L16 13.5"/></g>
+    </defs>
+  </svg>
+
+  <div class="page"></div>
+
+  <script src="../js/page.js"></script>
+  <script>
+  /* 占位：下方用字符串拼接避免模板歧义 */
+  (function () {
+    var P = window.Page;
+    function api() { return P.api(); }
+    function T(k) { return P.T(k); }
+    function esc(s) { return P.esc(s); }
+    function icon(id) { return '<svg class="icon" aria-hidden="true"><use href="#' + id + '"/></svg>'; }
+
+    function render() {
+      var root = document.querySelector(".page");
+      root.innerHTML = "";
+      var head = document.createElement("div");
+      head.className = "card";
+      head.innerHTML =
+        '<div class="row" style="align-items:center;gap:10px">' +
+        '<div class="icon" style="color:var(--accent)">' + icon("clock") + "</div>" +
+        '<h3 style="margin:0;flex:1">' + esc(T("history_title")) + '</h3>' +
+        '<span id="histCount" class="muted" style="font-size:13px"></span></div>' +
+        '<div class="row" style="margin-top:12px">' +
+        '<div style="flex:1;position:relative">' +
+        '<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--label-2)">' + icon("search") + '</span>' +
+        '<input class="input" id="histSearch" style="padding-left:40px" placeholder="' + esc(T("history_search_ph")) + '" /></div>' +
+        '<button class="btn ghost" id="btnExport">' + icon("download") + " " + esc(T("history_export_csv")) + "</button>" +
+        '<button class="btn gray" id="btnClear">' + icon("x") + " " + esc(T("history_clear")) + "</button></div>" +
+        '<div class="list" id="histList" style="margin-top:12px"></div>';
+      root.appendChild(head);
+
+      head.querySelector("#histSearch").addEventListener("input", function (e) {
+        load(e.target.value.trim());
+      });
+      head.querySelector("#btnExport").addEventListener("click", function () {
+        Promise.resolve(api().export_history_csv()).then(function (r) {
+          if (r && r.ok) api().open_external_folder(r.path);
+          else P.modal(T("crash_title"), (r && r.error) || "fail");
+        }).catch(function (e) { P.modal(T("crash_title"), String(e)); });
+      });
+      head.querySelector("#btnClear").addEventListener("click", function () {
+        if (confirm(T("clear_history") + "？")) {
+          api().clear_download_history();
+          load();
+        }
+      });
+      load();
+    }
+
+    function typeLabel(t) {
+      return ({ video: T("history_type_video"), audio: T("history_type_audio"),
+        both: T("history_type_both"), cover: T("history_type_cover") })[t] || t || "—";
+    }
+
+    function load(q) {
+      var prom = q ? api().download_history_search(q) : api().get_download_history(300);
+      Promise.resolve(prom).then(renderList).catch(function () {});
+    }
+
+    function renderList(rows) {
+      rows = rows || [];
+      var box = document.getElementById("histList");
+      var cnt = document.getElementById("histCount");
+      if (cnt) cnt.textContent = T("history_count").replace("{n}", rows.length);
+      if (!box) return;
+      if (!rows.length) { box.innerHTML = '<div class="center-empty">' + esc(T("no_history")) + "</div>"; return; }
+      box.innerHTML = "";
+      rows.forEach(function (r) {
+        var row = document.createElement("div");
+        row.className = "list-row";
+        row.innerHTML =
+          '<div class="icon" style="color:var(--accent)">' + icon("video") + "</div>" +
+          '<div class="grow"><div class="title">' + esc(r.title || r.url || "未命名") + "</div>" +
+          '<div class="sub">' + esc(typeLabel(r.download_type)) + " · " + esc(r.url || "") + "</div>" +
+          '<div class="sub muted">' + esc(r.created_at || "") + (r.save_path ? " · " + esc(r.save_path) : "") + "</div></div>" +
+          '<div class="acts-col">' +
+          '<button class="btn sm gray" data-act="open">' + esc(T("history_open_folder")) + "</button>" +
+          '<button class="btn sm primary" data-act="redl">' + esc(T("history_redownload")) + "</button>" +
+          '<button class="btn sm gray" data-act="del">' + esc(T("history_clear")) + "</button></div>";
+        row.querySelector('[data-act="open"]').addEventListener("click", function () {
+          if (r.save_path) api().open_external_folder(r.save_path);
+        });
+        row.querySelector('[data-act="redl"]').addEventListener("click", function () {
+          Promise.resolve(api().redownload(r.id)).then(function (res) {
+            if (res && res.ok) P.modal(T("history_redownload"), T("history_redl_ok"));
+            else P.modal(T("crash_title"), T("history_redl_fail").replace("{error}", (res && res.error) || "unknown"));
+          }).catch(function (e) { P.modal(T("crash_title"), String(e)); });
+        });
+        row.querySelector('[data-act="del"]').addEventListener("click", function () {
+          api().delete_history(r.id);
+          load(document.getElementById("histSearch").value.trim());
+        });
+        box.appendChild(row);
+      });
+    }
+
+    Page.boot(render);
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.spec
+
+# PyInstaller
+build/
+dist/
+
+# Inno Setup 产物
+installer/out/
+
+# 预下载的第三方组件（CI 自动获取，不入库）
+packaging/ffmpeg/ffmpeg.exe
+
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+*.log
+
+# 本地虚拟环境
+.venv/
+venv/
+
+# 数据库导出（用户生成，不入库）
+exports/
+
+# 编辑器 / IDE
+.idea/
+.vscode/
+*.egg-info/
