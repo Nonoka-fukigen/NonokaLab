@@ -49,10 +49,10 @@ Name: "ffmpeg"; Description: "FFmpeg（音视频合并所需，建议勾选）";
 Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: "额外快捷方式："; Components: main
 
 [Files]
-; 主程序（PyInstaller 单文件 exe）
-Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion; Components: main
+; 主程序（PyInstaller 单文件 exe，位于仓库根 dist\）
+Source: "..\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion; Components: main
 ; 可选 FFmpeg 组件：源文件不存在时跳过（CI 未预下载则仅安装主程序）
-Source: "packaging\ffmpeg\ffmpeg.exe"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist; Components: ffmpeg
+Source: "..\packaging\ffmpeg\ffmpeg.exe"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist; Components: ffmpeg
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Components: main
