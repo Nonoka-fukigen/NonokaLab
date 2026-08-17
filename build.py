@@ -12,6 +12,15 @@
 import os
 import sys
 
+# 强制 Python 以 UTF-8 处理 stdin/stdout，避免 CI（cp1252 代码页）下打印中文崩溃。
+# 相比直接重包 sys.stdout，PYTHONIOENCODING 更可靠，且在本地 / Actions 均生效。
+if sys.version_info >= (3, 7):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 import PyInstaller.__main__ as pyi
 
 REPO = os.path.dirname(os.path.abspath(__file__))

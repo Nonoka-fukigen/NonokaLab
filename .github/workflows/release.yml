@@ -49,11 +49,11 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p packaging/ffmpeg
-          curl -L --max-time 120 "https://ghfast.top/https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -o /tmp/ff.zip
+          curl -L --max-time 120 "https://ghfast.top/https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -o packaging/ffmpeg/ff.zip
           python - <<'PY'
           import zipfile, os
           try:
-              z = zipfile.ZipFile("/tmp/ff.zip")
+              z = zipfile.ZipFile("packaging/ffmpeg/ff.zip")
               for n in z.namelist():
                   if n.lower().endswith("ffmpeg.exe"):
                       with open("packaging/ffmpeg/ffmpeg.exe", "wb") as f:
