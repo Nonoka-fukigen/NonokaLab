@@ -37,7 +37,8 @@ CloseApplications=no
 SetupMutex="Global\NonokaLabSetupMutex"
 
 [Languages]
-Name: "chs"; MessagesFile: "compiler:ChineseSimplified.isl"
+; 中文语言文件由 GitHub Actions 预先下载到 installer\ChineseSimplified.isl（官方 issrc 仓库）
+Name: "chs"; MessagesFile: "ChineseSimplified.isl"
 
 [Components]
 Name: "main"; Description: "程序主文件"; Types: full compact; Flags: fixed
