@@ -14,7 +14,7 @@
 
 [Setup]
 ; 私有 GUID，避免与其它软件冲突
-AppId={1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D}
+AppId={{1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
